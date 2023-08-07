@@ -1,4 +1,4 @@
-name: SSH Actions
+name: SSH and Run Commands
 
 on:
   push:
@@ -13,11 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Run SSH script
+      - name: Configure SSH Key
         run: |
-          ssh -o StrictHostKeyChecking=no -l ubuntu 13.53.41.21 'whoami'
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H your_server_ip >> ~/.ssh/known_hosts
+
+      - name: SSH to Server and Run Commands
+        run: |
+          ssh ubuntu@13.53.41.21 "whoami"
+          ssh -o StrictHostKeyChecking=no -l ubuntu@13.53.41.21 'pwd'
