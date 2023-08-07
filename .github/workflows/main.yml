@@ -1,26 +1,16 @@
-name: SSH and Run Commands
-
-on:
-  push:
-    branches:
-      - main
-
+name: remote ssh command
+on: [push]
 jobs:
-  deploy:
+
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Configure SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H your_server_ip >> ~/.ssh/known_hosts
-
-      - name: SSH to Server and Run Commands
-        run: |
-          ssh ubuntu@13.53.41.21 "whoami"
-          ssh -o StrictHostKeyChecking=no -l ubuntu@13.53.41.21 'pwd'
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 13.53.41.21
+        username: ubuntu
+        password: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: whoami
