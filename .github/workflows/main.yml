@@ -1,28 +1,27 @@
-name: Push-to-EC2
+name: SSH to Remote Server
 
-# Trigger deployment only on push to main branch
 on:
   push:
     branches:
-      - main
+      - main  # Adjust the branch name as needed
 
 jobs:
-  deploy:
-    name: Deploy to EC2 on master branch push
+  ssh_to_remote_server:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the files
+      - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ec2-13-53-41-21.eu-north-1.compute.amazonaws.com
-          username: Ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            whoami
-            uname
-            pwd
-            ls
+      - name: SSH to Remote Server
+        env:
+          REMOTE_HOST: ec2-13-53-41-21.eu-north-1.compute.amazonaws.com
+          REMOTE_USER: Ubuntu
+          SSH_PRIVATE_KEY: {{ secrets.SSH_PRIVATE_KEY }}  # Store password as a GitHub secret
+        run: |
+          # Install SSH client
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
+
+          # Execute SSH command
+          sshpass -p "${SSH_PRIVATE_KEY}" ssh -o StrictHostKeyChecking=no "${REMOTE_USER}@${REMOTE_HOST}" "whoami"
